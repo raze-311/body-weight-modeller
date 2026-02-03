@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Body Weight Modeller</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #232732;
+    --border: #2e3344;
+    --text: #e2e0e8;
+    --text-dim: #8a8b9e;
+    --accent: #c8f06a;
+    --accent-dim: rgba(200,240,106,0.12);
+    --red: #ff6b6b;
+    --red-dim: rgba(255,107,107,0.12);
+    --blue: #6bcfff;
+    --blue-dim: rgba(107,207,255,0.12);
+    --amber: #ffb94a;
+    --amber-dim: rgba(255,185,74,0.12);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 40px 20px 80px;
+    overflow-x: hidden;
+  }
+
+  .wrapper {
+    max-width: 760px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── header ── */
+  header {
+    text-align: center;
+    margin-bottom: 44px;
+  }
+  header h1 {
+    font-weight: 800;
+    font-size: clamp(1.8rem, 4.5vw, 2.5rem);
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    color: #fff;
+  }
+  header h1 span { color: var(--accent); }
+  header p {
+    color: var(--text-dim);
+    font-size: .88rem;
+    margin-top: 8px;
+    font-weight: 400;
+  }
+
+  /* ── card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px 26px;
+    margin-bottom: 16px;
+  }
+  .card-label {
+    font-weight: 600;
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    color: var(--text-dim);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .card-label .dot {
+    width:7px; height:7px; border-radius:50%;
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent);
+  }
+  .card-label .dot.blue  { background: var(--blue);  box-shadow: 0 0 6px var(--blue); }
+  .card-label .dot.amber { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+  .card-label .dot.red   { background: var(--red);   box-shadow: 0 0 6px var(--red); }
+
+  /* ── grid rows ── */
+  .row         { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .row.three   { grid-template-columns:1fr 1fr 1fr; }
+
+  .field label {
+    display: block;
+    font-size: .78rem;
+    font-weight: 500;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+  .field .input-wrap { position: relative; }
+
+  .field input,
+  .field select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: .95rem;
+    font-weight: 500;
+    padding: 10px 38px 10px 13px;
+    transition: border-color .2s, box-shadow .2s;
+    -moz-appearance: textfield;
+  }
+  .field input::-webkit-outer-spin-button,
+  .field input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .field input:focus, .field select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+  .field .unit {
+    position: absolute;
+    right: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: .78rem;
+    color: var(--text-dim);
+    pointer-events: none;
+  }
+  .field select {
+    padding-right: 13px;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238a8b9e'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 13px center;
+  }
+  .field select option { background: var(--surface2); color: var(--text); }
+
+  /* ── slider ── */
+  .slider-track {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 5px;
+    border-radius: 3px;
+    background: var(--surface2);
+    outline: none;
+    margin-top: 6px;
+    cursor: pointer;
+  }
+  .slider-track::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px rgba(200,240,106,.35);
+    cursor: pointer;
+    transition: transform .15s;
+  }
+  .slider-track::-webkit-slider-thumb:hover { transform: scale(1.15); }
+  .slider-track::-moz-range-thumb {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px rgba(200,240,106,.35);
+    border: none;
+    cursor: pointer;
+  }
+
+  .slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  .slider-header .sl-label {
+    font-size: .78rem;
+    font-weight: 500;
+    color: var(--text-dim);
+  }
+  .slider-header .sl-val {
+    font-size: .88rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .slider-ticks {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+  }
+  .slider-ticks span {
+    font-size: .67rem;
+    color: var(--text-dim);
+    opacity: .7;
+  }
+
+  /* ── energy summary cards ── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 12px;
+  }
+  .s-card {
+    border-radius: 10px;
+    padding: 16px 12px;
+    text-align: center;
+  }
+  .s-card.green  { background: var(--accent-dim); border: 1px solid rgba(200,240,106,.25); }
+  .s-card.blue   { background: var(--blue-dim);   border: 1px solid rgba(107,207,255,.25); }
+  .s-card.amber  { background: var(--amber-dim);  border: 1px solid rgba(255,185,74,.25); }
+
+  .s-card .s-val {
+    font-weight: 700;
+    font-size: 1.55rem;
+    line-height: 1;
+  }
+  .s-card.green .s-val  { color: var(--accent); }
+  .s-card.blue  .s-val  { color: var(--blue); }
+  .s-card.amber .s-val  { color: var(--amber); }
+  .s-card .s-unit {
+    font-size: .72rem;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+  .s-card .s-label {
+    font-size: .7rem;
+    font-weight: 500;
+    color: var(--text-dim);
+    margin-top: 7px;
+  }
+
+  /* ── balance ── */
+  .balance-section { margin-top: 20px; }
+  .balance-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 10px;
+  }
+  .bal-group .bal-label {
+    font-size: .72rem;
+    font-weight: 500;
+    color: var(--text-dim);
+    margin-bottom: 3px;
+  }
+  .bal-group .bal-val {
+    font-weight: 700;
+    font-size: 1.25rem;
+  }
+  .bal-val.surplus { color: var(--red); }
+  .bal-val.deficit { color: var(--accent); }
+  .bal-val.zero    { color: var(--text-dim); }
+
+  .bar-outer {
+    height: 10px;
+    border-radius: 5px;
+    background: var(--surface2);
+    overflow: hidden;
+    position: relative;
+  }
+  .bar-outer::after {
+    content:'';
+    position: absolute;
+    left: 50%; top: 0; bottom: 0;
+    width: 2px; margin-left: -1px;
+    background: var(--border);
+    z-index: 2;
+  }
+  .bar-fill {
+    height: 100%;
+    position: absolute;
+    border-radius: 5px;
+    transition: width .4s cubic-bezier(.4,0,.2,1), left .4s cubic-bezier(.4,0,.2,1);
+  }
+  .bar-legend {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+  }
+  .bar-legend span {
+    font-size: .68rem;
+    font-weight: 500;
+  }
+  .bar-legend .leg-deficit { color: var(--accent); }
+  .bar-legend .leg-surplus { color: var(--red); }
+
+  /* ── breakdown ── */
+  .breakdown { margin-top: 18px; }
+  .breakdown-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: .88rem;
+  }
+  .breakdown-row:last-child { border-bottom: none; }
+  .breakdown-row .b-label { color: var(--text-dim); font-weight: 400; }
+  .breakdown-row .b-val   { color: var(--text);     font-weight: 600; }
+  .breakdown-row.total {
+    padding-top: 10px; margin-top: 4px;
+    border-top: 1px solid var(--border);
+    border-bottom: none;
+  }
+  .breakdown-row.total .b-label { color: var(--text); font-weight: 600; }
+  .breakdown-row.total .b-val   { color: var(--text); font-weight: 700; }
+
+  /* ── projection cards ── */
+  .projection-row {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .proj-item {
+    text-align: center;
+    padding: 13px 6px;
+    background: var(--surface2);
+    border-radius: 9px;
+    border: 1px solid var(--border);
+  }
+  .proj-item .proj-val {
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--text);
+  }
+  .proj-item .proj-label {
+    font-size: .68rem;
+    font-weight: 500;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  /* ── chart ── */
+  .chart-container { width: 100%; height: 260px; }
+  canvas { display: block; width: 100%; height: 100%; }
+
+  .note {
+    font-size: .75rem;
+    color: var(--text-dim);
+    line-height: 1.55;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ── responsive ── */
+  @media (max-width:540px) {
+    .row, .row.three      { grid-template-columns: 1fr; }
+    .summary-grid         { grid-template-columns: 1fr; }
+    .projection-row       { grid-template-columns: 1fr 1fr; }
+    .card                 { padding: 20px 18px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- Header -->
+  <header>
+    <h1>Body <span>Weight</span> Modeller</h1>
+    <p>Energy balance · BMR · Projected weight change</p>
+  </header>
+
+  <!-- 1. Profile -->
+  <div class="card">
+    <div class="card-label"><span class="dot"></span> Profile</div>
+    <div class="row three">
+      <div class="field">
+        <label>Height</label>
+        <div class="input-wrap">
+          <input type="number" id="height" value="175" min="100" max="250" step="1" oninput="calc()" />
+          <span class="unit">cm</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Starting Weight</label>
+        <div class="input-wrap">
+          <input type="number" id="weight" value="80" min="20" max="400" step="0.5" oninput="calc()" />
+          <span class="unit">kg</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Age</label>
+        <div class="input-wrap">
+          <input type="number" id="age" value="35" min="1" max="120" step="1" oninput="calc()" />
+          <span class="unit">yrs</span>
+        </div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:12px;">
+      <div class="field">
+        <label>Biological Sex</label>
+        <select id="sex" onchange="calc()">
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Activity & Intake -->
+  <div class="card">
+    <div class="card-label"><span class="dot blue"></span> Activity &amp; Intake</div>
+
+    <div class="slider-header">
+      <span class="sl-label">Weekly Exercise Level</span>
+      <span class="sl-val" id="exLabel">Moderate</span>
+    </div>
+    <input type="range" class="slider-track" id="exercise" min="0" max="6" value="2" step="1" oninput="calc()" />
+    <div class="slider-ticks">
+      <span>Sedentary</span><span>Light</span><span>Moderate</span><span>Active</span><span>V. Active</span><span>Extreme</span><span>Athlete</span>
+    </div>
+
+    <div class="row" style="margin-top:22px;">
+      <div class="field">
+        <label>Avg Daily Intake</label>
+        <div class="input-wrap">
+          <input type="number" id="intake" value="8400" min="500" max="40000" step="100" oninput="calc()" />
+          <span class="unit">kJ</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Projection Period</label>
+        <div class="input-wrap">
+          <input type="number" id="days" value="90" min="1" max="1825" step="1" oninput="calc()" />
+          <span class="unit">days</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Energy Summary -->
+  <div class="card">
+    <div class="card-label"><span class="dot amber"></span> Energy Summary</div>
+
+    <div class="summary-grid">
+      <div class="s-card green">
+        <div class="s-val" id="bmrVal">—</div>
+        <div class="s-unit">kJ / day</div>
+        <div class="s-label">BMR</div>
+      </div>
+      <div class="s-card blue">
+        <div class="s-val" id="tdeeVal">—</div>
+        <div class="s-unit">kJ / day</div>
+        <div class="s-label">Total Expenditure</div>
+      </div>
+      <div class="s-card amber">
+        <div class="s-val" id="intakeVal">—</div>
+        <div class="s-unit">kJ / day</div>
+        <div class="s-label">Intake</div>
+      </div>
+    </div>
+
+    <!-- Balance bar -->
+    <div class="balance-section">
+      <div class="balance-row">
+        <div class="bal-group">
+          <div class="bal-label">Daily Balance</div>
+          <div class="bal-val" id="balVal">—</div>
+        </div>
+        <div class="bal-group" style="text-align:right;">
+          <div class="bal-label">Est. weekly change</div>
+          <div class="bal-val" id="weeklyVal">—</div>
+        </div>
+      </div>
+      <div class="bar-outer">
+        <div class="bar-fill" id="barFill"></div>
+      </div>
+      <div class="bar-legend">
+        <span class="leg-deficit">← Deficit</span>
+        <span class="leg-surplus">Surplus →</span>
+      </div>
+    </div>
+
+    <!-- Breakdown -->
+    <div class="breakdown">
+      <div class="breakdown-row"><span class="b-label">Basal Metabolic Rate (Mifflin-St Jeor)</span><span class="b-val" id="bdBMR">—</span></div>
+      <div class="breakdown-row"><span class="b-label">Thermic Effect of Food (~10%)</span><span class="b-val" id="bdTEF">—</span></div>
+      <div class="breakdown-row"><span class="b-label">Non-Exercise Activity (NEAT)</span><span class="b-val" id="bdNEAT">—</span></div>
+      <div class="breakdown-row"><span class="b-label">Exercise Activity (EAT)</span><span class="b-val" id="bdEAT">—</span></div>
+      <div class="breakdown-row total"><span class="b-label">Total Daily Expenditure</span><span class="b-val" id="bdTDEE">—</span></div>
+    </div>
+  </div>
+
+  <!-- 4. Projection -->
+  <div class="card">
+    <div class="card-label"><span class="dot red"></span> Weight Projection</div>
+
+    <div class="projection-row">
+      <div class="proj-item">
+        <div class="proj-val" id="projStart">—</div>
+        <div class="proj-label">Start</div>
+      </div>
+      <div class="proj-item">
+        <div class="proj-val" id="projEnd">—</div>
+        <div class="proj-label">End Weight</div>
+      </div>
+      <div class="proj-item">
+        <div class="proj-val" id="projChange">—</div>
+        <div class="proj-label">Change</div>
+      </div>
+      <div class="proj-item">
+        <div class="proj-val" id="projDays">—</div>
+        <div class="proj-label">Days</div>
+      </div>
+    </div>
+
+    <div class="chart-container">
+      <canvas id="chart"></canvas>
+    </div>
+
+    <p class="note">
+      The projection simulates day-by-day: BMR is recalculated at each step using Mifflin-St Jeor as weight (and age) changes, so TDEE adapts over time — the curve will naturally flatten as a deficit narrows the gap. X-axis: M = months (~30.4 days), Y = years (365 days). Consult a healthcare professional before making significant dietary changes.
+    </p>
+  </div>
+
+</div><!-- /wrapper -->
+
+<script>
+// ── constants ──────────────────────────────────────
+const kcalToKJ = 4.184;
+
+const ACTIVITY = [
+  { label: 'Sedentary',   mult: 1.20  },
+  { label: 'Light',       mult: 1.375 },
+  { label: 'Moderate',    mult: 1.55  },
+  { label: 'Active',      mult: 1.725 },
+  { label: 'Very Active', mult: 1.90  },
+  { label: 'Extreme',     mult: 2.10  },
+  { label: 'Athlete',     mult: 2.30  },
+];
+
+// ── helpers ────────────────────────────────────────
+function round1(n) { return Math.round(n * 10) / 10; }
+function fmt(n)    { return Math.round(n).toLocaleString(); }
+
+// Mifflin-St Jeor — weight kg, height cm, returns kcal/day
+function mifflinBMR(weight, height, age, sex) {
+  const base = 10 * weight + 6.25 * height - 5 * age;
+  return sex === 'male' ? base + 5 : base - 161;
+}
+
+// ── main calc ──────────────────────────────────────
+function calc() {
+  const height   = parseFloat(document.getElementById('height').value)  || 175;
+  const weight   = parseFloat(document.getElementById('weight').value)  || 80;
+  const age      = parseFloat(document.getElementById('age').value)     || 35;
+  const sex      = document.getElementById('sex').value;
+  const exIdx    = parseInt(document.getElementById('exercise').value);
+  const intakeKJ = parseFloat(document.getElementById('intake').value)  || 8400;
+  const days     = parseInt(document.getElementById('days').value)      || 90;
+
+  // BMR
+  const bmrKcal = mifflinBMR(weight, height, age, sex);
+  const bmrKJ   = bmrKcal * kcalToKJ;
+
+  // Activity
+  const act = ACTIVITY[exIdx];
+  document.getElementById('exLabel').textContent = act.label;
+
+  // TDEE breakdown (kcal)
+  const tdeeKcal = bmrKcal * act.mult;
+  const tef      = bmrKcal * 0.10;                      // thermic effect ~10%
+  const neat     = bmrKcal * 0.15;                      // NEAT ~15%
+  const eat      = tdeeKcal - bmrKcal - tef - neat;     // exercise = remainder
+
+  // kJ
+  const tdeeKJ = tdeeKcal * kcalToKJ;
+  const tefKJ  = tef      * kcalToKJ;
+  const neatKJ = neat     * kcalToKJ;
+  const eatKJ  = Math.max(0, eat * kcalToKJ);
+
+  // Balance
+  const balKJ     = intakeKJ - tdeeKJ;
+  const kgPerDay  = (balKJ / kcalToKJ) / 7700;   // ~7700 kcal ≈ 1 kg fat
+  const kgPerWeek = kgPerDay * 7;
+
+  // ── DOM updates ────────────────────────────────
+  document.getElementById('bmrVal').textContent    = fmt(bmrKJ);
+  document.getElementById('tdeeVal').textContent   = fmt(tdeeKJ);
+  document.getElementById('intakeVal').textContent = fmt(intakeKJ);
+
+  // Balance text + colour
+  const balEl = document.getElementById('balVal');
+  balEl.textContent = (balKJ >= 0 ? '+' : '') + fmt(balKJ) + ' kJ';
+  balEl.className   = 'bal-val ' + (balKJ > 0 ? 'surplus' : balKJ < 0 ? 'deficit' : 'zero');
+
+  const wEl = document.getElementById('weeklyVal');
+  if (Math.abs(kgPerWeek) < 0.01) {
+    wEl.textContent = '± 0 kg/wk';
+    wEl.className   = 'bal-val zero';
+  } else {
+    wEl.textContent = (kgPerWeek >= 0 ? '+' : '') + round1(kgPerWeek) + ' kg/wk';
+    wEl.className   = 'bal-val ' + (kgPerWeek > 0 ? 'surplus' : 'deficit');
+  }
+
+  // Balance bar — centre = 0, clamp ±20 000 kJ
+  const clamped = Math.max(-20000, Math.min(20000, balKJ));
+  const barFill = document.getElementById('barFill');
+  if (balKJ >= 0) {
+    barFill.style.left       = '50%';
+    barFill.style.width      = ((clamped / 20000) * 50) + '%';
+    barFill.style.background = 'var(--red)';
+  } else {
+    const w = (-clamped / 20000) * 50;
+    barFill.style.left       = (50 - w) + '%';
+    barFill.style.width      = w + '%';
+    barFill.style.background = 'var(--accent)';
+  }
+
+  // Breakdown
+  document.getElementById('bdBMR').textContent  = fmt(bmrKJ)  + ' kJ';
+  document.getElementById('bdTEF').textContent  = fmt(tefKJ)  + ' kJ';
+  document.getElementById('bdNEAT').textContent = fmt(neatKJ) + ' kJ';
+  document.getElementById('bdEAT').textContent  = fmt(eatKJ)  + ' kJ';
+  document.getElementById('bdTDEE').textContent = fmt(tdeeKJ) + ' kJ';
+
+  // ── day-by-day simulation ─────────────────────
+  // Each day: recalc BMR at current weight → TDEE → daily balance → weight delta.
+  // This naturally captures how expenditure shrinks (or grows) with weight.
+  const weights = simulate(height, weight, age, sex, act.mult, intakeKJ, days);
+  const endWeight = weights[weights.length - 1];
+  const chg       = round1(endWeight - weight);
+  const col       = chg > 0 ? 'var(--red)' : chg < 0 ? 'var(--accent)' : 'var(--text)';
+
+  document.getElementById('projStart').textContent  = round1(weight)    + ' kg';
+  document.getElementById('projEnd').textContent    = round1(endWeight) + ' kg';
+  document.getElementById('projChange').textContent = (chg >= 0 ? '+' : '') + chg + ' kg';
+  document.getElementById('projDays').textContent   = days + ' d';
+  document.getElementById('projEnd').style.color    = col;
+  document.getElementById('projChange').style.color = col;
+
+  drawChart(weights, days);
+}
+
+// ── simulate ───────────────────────────────────────
+// Returns array of weights, one per day (index 0 = day 0 = startWeight).
+function simulate(height, startW, age, sex, actMult, intakeKJ, days) {
+  const w = [startW];
+  let cur = startW;
+  for (let d = 1; d <= days; d++) {
+    // age advances every 365 days
+    const curAge   = age + d / 365;
+    const bmrKcal  = mifflinBMR(cur, height, curAge, sex);
+    const tdeeKcal = bmrKcal * actMult;
+    const tdeeKJ   = tdeeKcal * kcalToKJ;
+    const balKJ    = intakeKJ - tdeeKJ;
+    // convert surplus/deficit to kg change  (~32.2 MJ per kg fat → 7700 kcal)
+    const balKcal  = balKJ / kcalToKJ;
+    cur += balKcal / 7700;
+    // floor at a physiological minimum (BMR doesn't let you go to 0)
+    if (cur < 30) cur = 30;
+    w.push(cur);
+  }
+  return w;
+}
+
+// ── chart ──────────────────────────────────────────
+function drawChart(weights, days) {
+  const canvas = document.getElementById('chart');
+  const ctx    = canvas.getContext('2d');
+  const dpr    = window.devicePixelRatio || 1;
+  const rect   = canvas.parentElement.getBoundingClientRect();
+
+  canvas.width  = rect.width  * dpr;
+  canvas.height = rect.height * dpr;
+  canvas.style.width  = rect.width  + 'px';
+  canvas.style.height = rect.height + 'px';
+  ctx.scale(dpr, dpr);
+
+  const W = rect.width, H = rect.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const pad = { t:16, r:18, b:38, l:56 };
+  const cW  = W - pad.l - pad.r;
+  const cH  = H - pad.t  - pad.b;
+
+  // y range
+  const minW  = Math.min(...weights);
+  const maxW  = Math.max(...weights);
+  const range = maxW - minW || 2;
+  const padY  = range * 0.18;
+  const yMin  = minW - padY;
+  const yMax  = maxW + padY;
+
+  const xS = d => pad.l + (d / days) * cW;
+  const yS = w => pad.t + cH - ((w - yMin) / (yMax - yMin)) * cH;
+
+  // ── y grid ─────────────────────────────────────
+  const ySteps = 5;
+  for (let i = 0; i <= ySteps; i++) {
+    const val = yMin + (yMax - yMin) * (i / ySteps);
+    const y   = yS(val);
+    ctx.strokeStyle = 'rgba(46,51,68,0.5)';
+    ctx.lineWidth   = 1;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W - pad.r, y); ctx.stroke();
+
+    ctx.fillStyle    = 'rgba(138,139,158,0.8)';
+    ctx.font         = '11px Inter, sans-serif';
+    ctx.textAlign    = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(round1(val).toFixed(1), pad.l - 8, y);
+  }
+
+  // y-axis label
+  ctx.save();
+  ctx.translate(15, pad.t + cH / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillStyle = 'rgba(138,139,158,0.7)';
+  ctx.font      = '11px Inter, sans-serif';
+  ctx.fillText('kg', 0, 0);
+  ctx.restore();
+
+  // ── x-axis: month & year markers ───────────────
+  const MONTH = 30.44;   // avg days/month
+  const YEAR  = 365;
+
+  // collect tick objects  { day, label, isYear }
+  const ticks = [];
+  // always add day-0
+  ticks.push({ day: 0, label: 'Start', isYear: false });
+
+  // years first (so we can skip month ticks that land on a year)
+  const yearDays = new Set();
+  for (let y = 1; y * YEAR <= days; y++) {
+    const d = Math.round(y * YEAR);
+    yearDays.add(d);
+    ticks.push({ day: d, label: 'Y' + y, isYear: true });
+  }
+
+  // months — skip if too close to a year tick or if days < ~45 (avoid clutter)
+  if (days >= 45) {
+    for (let m = 1; m * MONTH <= days; m++) {
+      const d = Math.round(m * MONTH);
+      // skip if within 12 days of a year tick
+      let tooClose = false;
+      yearDays.forEach(yd => { if (Math.abs(d - yd) < 12) tooClose = true; });
+      if (!tooClose && d <= days) {
+        ticks.push({ day: d, label: 'M' + m, isYear: false });
+      }
+    }
+  }
+
+  // if total days < 45 just show evenly spaced day labels
+  if (days < 45) {
+    ticks.length = 0;   // clear
+    const step = days <= 7 ? 1 : days <= 14 ? 2 : days <= 30 ? 5 : 10;
+    for (let d = 0; d <= days; d += step) {
+      ticks.push({ day: d, label: 'd' + d, isYear: false });
+    }
+  }
+
+  // sort by day
+  ticks.sort((a, b) => a.day - b.day);
+
+  // draw ticks
+  ticks.forEach(t => {
+    const x = xS(t.day);
+
+    if (t.isYear) {
+      // year: brighter dashed line
+      ctx.strokeStyle = 'rgba(107,207,255,0.45)';
+      ctx.lineWidth   = 1.5;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, H - pad.b); ctx.stroke();
+      ctx.setLineDash([]);
+
+      // label (two-row: year number on top, day count dimmer below)
+      ctx.fillStyle    = 'rgba(107,207,255,0.9)';
+      ctx.font         = '600 11px Inter, sans-serif';
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText(t.label, x, H - pad.b + 5);
+      ctx.fillStyle = 'rgba(138,139,158,0.55)';
+      ctx.font      = '10px Inter, sans-serif';
+      ctx.fillText('d' + t.day, x, H - pad.b + 18);
+    } else {
+      // month or day tick
+      ctx.strokeStyle = 'rgba(46,51,68,0.35)';
+      ctx.lineWidth   = 1;
+      ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, H - pad.b); ctx.stroke();
+
+      ctx.fillStyle    = 'rgba(138,139,158,0.75)';
+      ctx.font         = '11px Inter, sans-serif';
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText(t.label, x, H - pad.b + 5);
+    }
+  });
+
+  // ── area fill ──────────────────────────────────
+  const endW  = weights[weights.length - 1];
+  const isUp  = endW >= weights[0];
+  const lc    = isUp ? [255,107,107] : [200,240,106];
+
+  const grad = ctx.createLinearGradient(0, pad.t, 0, H - pad.b);
+  grad.addColorStop(0,   `rgba(${lc[0]},${lc[1]},${lc[2]},0.22)`);
+  grad.addColorStop(0.7, `rgba(${lc[0]},${lc[1]},${lc[2]},0.05)`);
+  grad.addColorStop(1,   `rgba(${lc[0]},${lc[1]},${lc[2]},0)`);
+
+  ctx.beginPath();
+  ctx.moveTo(xS(0), yS(weights[0]));
+  for (let i = 1; i < weights.length; i++) {
+    ctx.lineTo(xS(i), yS(weights[i]));
+  }
+  ctx.lineTo(xS(days), H - pad.b);
+  ctx.lineTo(xS(0),    H - pad.b);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // ── line ───────────────────────────────────────
+  ctx.beginPath();
+  ctx.moveTo(xS(0), yS(weights[0]));
+  for (let i = 1; i < weights.length; i++) {
+    ctx.lineTo(xS(i), yS(weights[i]));
+  }
+  ctx.strokeStyle = isUp ? 'rgb(255,107,107)' : 'rgb(200,240,106)';
+  ctx.lineWidth   = 2.5;
+  ctx.lineCap     = 'round';
+  ctx.stroke();
+
+  // ── dots ───────────────────────────────────────
+  // start
+  ctx.beginPath();
+  ctx.arc(xS(0), yS(weights[0]), 4, 0, Math.PI * 2);
+  ctx.fillStyle = '#fff';
+  ctx.fill();
+
+  // end
+  const ex = xS(days), ey = yS(endW);
+  ctx.beginPath();
+  ctx.arc(ex, ey, 9, 0, Math.PI * 2);
+  ctx.strokeStyle = isUp ? 'rgba(255,107,107,0.3)' : 'rgba(200,240,106,0.3)';
+  ctx.lineWidth   = 3;
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(ex, ey, 5, 0, Math.PI * 2);
+  ctx.fillStyle = isUp ? 'rgb(255,107,107)' : 'rgb(200,240,106)';
+  ctx.fill();
+}
+
+window.addEventListener('resize', calc);
+calc();
+</script>
+</body>
+</html>
